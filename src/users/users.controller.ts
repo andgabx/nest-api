@@ -1,13 +1,15 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 
 @ApiTags('Usuários')
@@ -20,6 +22,11 @@ export class UsersController {
     summary: 'Lists all users',
     description: 'Returns a list of all users. Can filter by role.',
   })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: ['INTERN', 'ENGINEER', 'ADMIN'],
+  })
   findAll(@Query('role') role?: 'INTERN' | 'ENGINEER' | 'ADMIN') {
     return this.usersService.findAll(role);
   }
@@ -29,8 +36,8 @@ export class UsersController {
     summary: 'Gets a user by ID',
     description: 'Returns the details of a user based on the provided ID.',
   })
-  findOne(@Param('id') id: string) {
-    return { id };
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.findOne(id);
   }
 
   @Get('interns')
@@ -39,7 +46,7 @@ export class UsersController {
     description: 'Returns a list of all users with the role of intern.',
   })
   findAllInterns() {
-    return 'all interns';
+    return this.usersService.findAll('INTERN');
   }
 
   @Post()
@@ -57,16 +64,41 @@ export class UsersController {
       },
     },
   })
-  createUser(@Body() user: { name: string; id: number }) {
-    return `user ${user.name}`;
+  createUser(
+    @Body()
+    user: {
+      name: string;
+      id: number;
+      email: string;
+      role: 'ENGINEER' | 'INTERN' | 'ADMIN';
+    },
+  ) {
+    return this.usersService.createUser(user);
   }
 
-  @Patch() // PATCH /users/:id
+  @Patch(':id') // PATCH /users/:id
   @ApiOperation({
     summary: 'Updates an existing user',
     description: 'Updates the information of a user based on the provided ID.',
   })
-  updateUser(@Param('id') id: string, @Body() userUpdate: {}) {
-    return { id, ...userUpdate };
+  updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body()
+    userUpdate: {
+      name?: string;
+      email?: string;
+      role?: 'INTERN' | 'ENGINEER' | 'ADMIN';
+    },
+  ) {
+    return this.usersService.updateUser(id, userUpdate);
+  }
+
+  @Delete(':id') // DELETE /users/:id
+  @ApiOperation({
+    summary: 'Deletes a user',
+    description: 'Deletes a user based on the provided ID.',
+  })
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.deleteUser(id);
   }
 }
