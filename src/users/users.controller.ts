@@ -8,9 +8,12 @@ import {
   Patch,
   Post,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('Usuários')
 @Controller('users') // /users
@@ -40,7 +43,7 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  @Get('interns')
+  @Get('interns') // GET /users/interns
   @ApiOperation({
     summary: 'Lists all interns',
     description: 'Returns a list of all users with the role of intern.',
@@ -49,7 +52,7 @@ export class UsersController {
     return this.usersService.findAll('INTERN');
   }
 
-  @Post()
+  @Post() // POST /users
   @ApiOperation({
     summary: 'Creates a new user',
     description:
@@ -60,20 +63,20 @@ export class UsersController {
       type: 'object',
       properties: {
         name: { type: 'string', example: 'John' },
-        id: { type: 'number', example: 123 },
+        email: { type: 'string', example: 'john@example.com' },
+        role: {
+          type: 'string',
+          enum: ['ENGINEER', 'INTERN', 'ADMIN'],
+          example: 'ENGINEER',
+        },
       },
     },
   })
   createUser(
-    @Body()
-    user: {
-      name: string;
-      id: number;
-      email: string;
-      role: 'ENGINEER' | 'INTERN' | 'ADMIN';
-    },
+    @Body(ValidationPipe)
+    createUserDto: CreateUserDto,
   ) {
-    return this.usersService.createUser(user);
+    return this.usersService.createUser(createUserDto);
   }
 
   @Patch(':id') // PATCH /users/:id
@@ -81,16 +84,26 @@ export class UsersController {
     summary: 'Updates an existing user',
     description: 'Updates the information of a user based on the provided ID.',
   })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'John' },
+        email: { type: 'string', example: 'john@example.com' },
+        role: {
+          type: 'string',
+          enum: ['ENGINEER', 'INTERN', 'ADMIN'],
+          example: 'ENGINEER',
+        },
+      },
+    },
+  })
   updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body()
-    userUpdate: {
-      name?: string;
-      email?: string;
-      role?: 'INTERN' | 'ENGINEER' | 'ADMIN';
-    },
+    @Body(ValidationPipe)
+    updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.updateUser(id, userUpdate);
+    return this.usersService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id') // DELETE /users/:id
