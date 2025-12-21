@@ -49,6 +49,4 @@ export class PetsService {
     return this.petsRepository.remove(id);
   }
 
-  // OBS: Os métodos addTutor e removeTutor foram deletados daqui
-  // porque agora eles pertencem ao PetTutorService.
 }

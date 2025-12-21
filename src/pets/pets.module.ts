@@ -8,7 +8,6 @@ import { DatabaseModule } from 'src/database/database.module';
   imports: [DatabaseModule],
   controllers: [PetsController],
   providers: [PetsService, PetsRepository],
-  // VITAL: You must export the Repository so PetTutorModule can use it
   exports: [PetsRepository],
 })
 export class PetsModule {}

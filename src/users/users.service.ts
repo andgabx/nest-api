@@ -6,19 +6,30 @@ import {
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async create(createUserDto: CreateUserDto) {
-    const userExists = await this.usersRepository.findByEmail(
-      createUserDto.email,
-    );
-    if (userExists) {
-      throw new ConflictException('Email address already in use');
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+
+    try {
+      const user = await this.usersRepository.create({
+        ...createUserDto,
+        password: hashedPassword,
+      });
+
+      const { password, ...result } = user;
+      return result;
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('Email já está em uso.');
+      }
+      throw error;
     }
-    return this.usersRepository.create(createUserDto);
   }
 
   async findAll() {
@@ -39,7 +50,16 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     await this.findOne(id);
-    return this.usersRepository.update(id, updateUserDto);
+
+    if (updateUserDto.password) {
+      const salt = await bcrypt.genSalt();
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+    }
+
+    const user = await this.usersRepository.update(id, updateUserDto);
+
+    const { password, ...result } = user;
+    return result;
   }
 
   async remove(id: number) {
