@@ -1,22 +1,22 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { PrismaNeon } from '@prisma/adapter-neon';
-import ws from 'ws';
-
-// Necessário para o driver do Neon funcionar em ambiente Node.js
-neonConfig.webSocketConstructor = ws;
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit {
-  constructor() {
-    const connectionString = process.env.DATABASE_URL;
+  constructor(configService: ConfigService) {
+    const connectionString = configService.get<string>('DATABASE_URL');
 
+    // 1. Cria o Pool do driver nativo 'pg'
     const pool = new Pool({ connectionString });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-    const adapter = new PrismaNeon(pool as any);
+    // 2. Cria o adaptador do Prisma
+    const adapter = new PrismaPg(pool);
 
+    // 3. Passa para o PrismaClient.
+    // Isso resolve o erro "needs to be constructed with non-empty options"
     super({ adapter });
   }
 

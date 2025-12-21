@@ -1,18 +1,25 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersController } from './users/users.controller';
-import { UsersService } from './users/users.service';
 import { UsersModule } from './users/users.module';
 import { DatabaseModule } from './database/database.module';
-import { EmployeesModule } from './employees/employees.module';
-import { EmployeesController } from './employees/employees.controller';
-import { EmployeesService } from './employees/employees.service';
-import { EmployeesRepository } from './employees/employees.repository';
+import { PetsModule } from './pets/pets.module';
+import { PetTutorModule } from './pet-tutor/pet-tutor.module';
+import { HealthModule } from './health/health.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UsersModule, DatabaseModule, EmployeesModule],
-  controllers: [AppController, UsersController, EmployeesController],
-  providers: [AppService, UsersService, EmployeesService, EmployeesRepository],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    UsersModule,
+    PetsModule,
+    PetTutorModule,
+    DatabaseModule,
+    HealthModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

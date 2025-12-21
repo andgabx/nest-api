@@ -1,117 +1,55 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  Param,
-  ParseIntPipe,
-  Patch,
   Post,
-  Query,
-  ValidationPipe,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('Usuários')
-@Controller('users') // /users
+@ApiTags('Users')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get() // GET /users
-  @ApiOperation({
-    summary: 'Lists all users',
-    description: 'Returns a list of all users. Can filter by role.',
-  })
-  @ApiQuery({
-    name: 'role',
-    required: false,
-    enum: ['INTERN', 'ENGINEER', 'ADMIN'],
-  })
-  findAll(@Query('role') role?: 'INTERN' | 'ENGINEER' | 'ADMIN') {
-    return this.usersService.findAll(role);
+  @Post()
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({ status: 201, description: 'User created successfully.' })
+  @ApiResponse({ status: 409, description: 'Email already exists.' })
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
   }
 
-  @Get(':id') // GET /users/:id
-  @ApiOperation({
-    summary: 'Gets a user by ID',
-    description: 'Returns the details of a user based on the provided ID.',
-  })
+  @Get()
+  @ApiOperation({ summary: 'List all users' })
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(id);
   }
 
-  @Get('interns') // GET /users/interns
-  @ApiOperation({
-    summary: 'Lists all interns',
-    description: 'Returns a list of all users with the role of intern.',
-  })
-  findAllInterns() {
-    return this.usersService.findAll('INTERN');
-  }
-
-  @Post() // POST /users
-  @ApiOperation({
-    summary: 'Creates a new user',
-    description:
-      'Creates a new user with the information provided in the request body.',
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', example: 'John' },
-        email: { type: 'string', example: 'john@example.com' },
-        role: {
-          type: 'string',
-          enum: ['ENGINEER', 'INTERN', 'ADMIN'],
-          example: 'ENGINEER',
-        },
-      },
-    },
-  })
-  createUser(
-    @Body(ValidationPipe)
-    createUserDto: CreateUserDto,
-  ) {
-    return this.usersService.createUser(createUserDto);
-  }
-
-  @Patch(':id') // PATCH /users/:id
-  @ApiOperation({
-    summary: 'Updates an existing user',
-    description: 'Updates the information of a user based on the provided ID.',
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', example: 'John' },
-        email: { type: 'string', example: 'john@example.com' },
-        role: {
-          type: 'string',
-          enum: ['ENGINEER', 'INTERN', 'ADMIN'],
-          example: 'ENGINEER',
-        },
-      },
-    },
-  })
-  updateUser(
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update user' })
+  update(
     @Param('id', ParseIntPipe) id: number,
-    @Body(ValidationPipe)
-    updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.updateUser(id, updateUserDto);
+    return this.usersService.update(id, updateUserDto);
   }
 
-  @Delete(':id') // DELETE /users/:id
-  @ApiOperation({
-    summary: 'Deletes a user',
-    description: 'Deletes a user based on the provided ID.',
-  })
-  deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.deleteUser(id);
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete user' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.remove(id);
   }
 }

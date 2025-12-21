@@ -1,29 +1,90 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = [] // Habilite isso para v7 + Neon
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model Employee {
+enum Role {
+  USER  
+  ADMIN 
+}
+
+// 2. Padronizar a espécie ajuda a sugerir vacinas corretas no futuro
+enum Species {
+  DOG
+  CAT
+  BIRD
+  OTHER
+}
+
+enum RecordType {
+  VACCINE
+  DEWORMING    // Vermífugo
+  CONSULTATION // Consulta
+  EXAM         // Exame
+  SURGERY      // Cirurgia
+  OTHER
+}
+
+model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
-  role      Role
+  password  String   
+  role      Role     @default(USER) // Por padrão, todo mundo é User
+
+  ownedPets   Pet[]  @relation("OwnerRelation") 
+  tutoredPets Pet[]  @relation("TutorRelation") 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("users") // Boa prática: nomes de tabelas em minúsculo/plural no banco
 }
 
-enum Role {
-  ENGINEER
-  INTERN
-  ADMIN
+model Pet {
+  id        Int       @id @default(autoincrement())
+  name      String
+  species   Species   // Usa o Enum
+  breed     String?   // Raça (opcional, pois pode ser SRD)
+  birthDate DateTime? // Opcional (nem sempre sabem o dia exato)
+  weight    Float?    // Peso é útil para cálculo de remédios
+  pedigree  Boolean   @default(false) // Se tem pedigree ou não
+  healthRecords HealthRecord[]
+  ownerId   Int
+  owner     User      @relation("OwnerRelation", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  tutors    User[]    @relation("TutorRelation")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("pets")
+}
+
+model HealthRecord {
+  id          Int        @id @default(autoincrement())
+  
+  type        RecordType // VACCINE, CONSULTATION, etc.
+  title       String     // e.g., "Rabies Dose 1", "Dermatologist"
+  
+  date        DateTime   // When it happened
+  nextDueDate DateTime?  // When is the next one? (Crucial for reminders!)
+  
+  notes       String?    // e.g., "Doctor said to change diet"
+  doctor      String?    // e.g., "Dr. House"
+  clinic      String?    // e.g., "PetCare Center"
+
+  // Relation to Pet
+  petId       Int
+  pet         Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("health_records")
 }
