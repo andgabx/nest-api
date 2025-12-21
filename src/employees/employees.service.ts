@@ -30,7 +30,7 @@ export class EmployeesService {
 
   async findOne(id: number) {
     const employee = await this.repository.findOne(id);
-    if (!employee) throw new NotFoundException('Funcionário não encontrado');
+    if (!employee) throw new NotFoundException('  não encontrado');
     return employee;
   }
 
