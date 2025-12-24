@@ -4,25 +4,26 @@ import { PetsRepository } from 'src/pets/pets.repository';
 import { CreateHealthRecordDto } from './dto/create-health-record.dto';
 import { UpdateHealthRecordDto } from './dto/update-health-record.dto';
 import { Prisma, RecordType } from '@prisma/client';
+import { PetsService } from 'src/pets/pets.service';
 
 @Injectable()
 export class HealthService {
   constructor(
     private readonly healthRepository: HealthRepository,
-    private readonly petsRepository: PetsRepository,
+    private readonly petsService: PetsService,
   ) {}
 
-  async create(petId: number, createHealthDto: CreateHealthRecordDto) {
-    const pet = await this.petsRepository.findOne(petId);
+  async create(petId: number, createHealthRecordDto: CreateHealthRecordDto) {
+    const pet = await this.petsService.findOne(petId);
     if (!pet) {
       throw new NotFoundException(`Pet with ID ${petId} not found`);
     }
 
-    return this.healthRepository.create(petId, createHealthDto);
+    return this.healthRepository.create(petId, createHealthRecordDto);
   }
 
   async findAllByPet(petId: number, type?: RecordType) {
-    const pet = await this.petsRepository.findOne(petId);
+    const pet = await this.petsService.findOne(petId);
     if (!pet) {
       throw new NotFoundException(`Pet with ID ${petId} not found`);
     }
