@@ -1,12 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { Prisma, HealthRecord, RecordType } from '@prisma/client';
+import { CreateHealthRecordDto } from './dto/create-health-record.dto';
+import { UpdateHealthRecordDto } from './dto/update-health-record.dto';
 
 @Injectable()
 export class HealthRepository {
   constructor(private readonly prisma: DatabaseService) {}
 
-  async create(data: Prisma.HealthRecordCreateInput): Promise<HealthRecord> {
+  async create(
+    petId: number,
+    createHealthDto: CreateHealthRecordDto,
+  ): Promise<HealthRecord> {
+    const { date, nextDueDate, ...rest } = createHealthDto;
+
+    const data: Prisma.HealthRecordCreateInput = {
+      ...rest,
+      date: new Date(date),
+      nextDueDate: nextDueDate ? new Date(nextDueDate) : undefined,
+      pet: {
+        connect: { id: petId },
+      },
+    };
+
     return this.prisma.healthRecord.create({ data });
   }
 
@@ -27,11 +43,15 @@ export class HealthRepository {
     return this.prisma.healthRecord.findUnique({ where: { id } });
   }
 
-  async update(
-    id: number,
-    data: Prisma.HealthRecordUpdateInput,
-  ): Promise<HealthRecord> {
-    return this.prisma.healthRecord.update({ where: { id }, data });
+  async update(id: number, data: UpdateHealthRecordDto): Promise<HealthRecord> {
+    const { date, nextDueDate, ...rest } = data;
+
+    const updateData: Prisma.HealthRecordUpdateInput = {
+      ...rest,
+      date: date ? new Date(date) : undefined,
+      nextDueDate: nextDueDate ? new Date(nextDueDate) : undefined,
+    };
+    return this.prisma.healthRecord.update({ where: { id }, data: updateData });
   }
 
   async remove(id: number): Promise<HealthRecord> {

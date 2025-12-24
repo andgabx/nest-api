@@ -12,27 +12,13 @@ export class HealthService {
     private readonly petsRepository: PetsRepository,
   ) {}
 
-  async create(petId: number, dto: CreateHealthRecordDto) {
-    
+  async create(petId: number, createHealthDto: CreateHealthRecordDto) {
     const pet = await this.petsRepository.findOne(petId);
     if (!pet) {
       throw new NotFoundException(`Pet with ID ${petId} not found`);
     }
 
-    const data: Prisma.HealthRecordCreateInput = {
-      type: dto.type,
-      title: dto.title,
-      date: new Date(dto.date),
-      nextDueDate: dto.nextDueDate ? new Date(dto.nextDueDate) : undefined,
-      notes: dto.notes,
-      doctor: dto.doctor,
-      clinic: dto.clinic,
-      pet: {
-        connect: { id: petId },
-      },
-    };
-
-    return this.healthRepository.create(data);
+    return this.healthRepository.create(petId, createHealthDto);
   }
 
   async findAllByPet(petId: number, type?: RecordType) {
@@ -51,16 +37,10 @@ export class HealthService {
     return record;
   }
 
-  async update(id: number, dto: UpdateHealthRecordDto) {
-    await this.findOne(id); 
+  async update(id: number, updateHealthRecordDto: UpdateHealthRecordDto) {
+    await this.findOne(id);
 
-    const data: Prisma.HealthRecordUpdateInput = {
-      ...dto,
-      date: dto.date ? new Date(dto.date) : undefined,
-      nextDueDate: dto.nextDueDate ? new Date(dto.nextDueDate) : undefined,
-    };
-
-    return this.healthRepository.update(id, data);
+    return this.healthRepository.update(id, updateHealthRecordDto);
   }
 
   async remove(id: number) {
