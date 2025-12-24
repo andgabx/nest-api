@@ -26,7 +26,7 @@ export class UsersService {
       return result;
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new ConflictException('Email já está em uso.');
+        throw new ConflictException('Email is already being used');
       }
       throw error;
     }

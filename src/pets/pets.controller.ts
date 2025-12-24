@@ -12,7 +12,6 @@ import {
 import { PetsService } from './pets.service';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
-import { AddTutorDto } from '../pet-tutor/dto/add-tutor.dto';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Pets')
@@ -29,7 +28,7 @@ export class PetsController {
   })
   create(
     @Body() createPetDto: CreatePetDto,
-    @Query('userId', ParseIntPipe) userId: number, // Simulating logged user
+    @Query('userId', ParseIntPipe) userId: number, 
   ) {
     return this.petsService.create(userId, createPetDto);
   }

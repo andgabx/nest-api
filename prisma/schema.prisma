@@ -13,7 +13,6 @@ enum Role {
   ADMIN 
 }
 
-// 2. Padronizar a espécie ajuda a sugerir vacinas corretas no futuro
 enum Species {
   DOG
   CAT
@@ -23,10 +22,10 @@ enum Species {
 
 enum RecordType {
   VACCINE
-  DEWORMING    // Vermífugo
-  CONSULTATION // Consulta
-  EXAM         // Exame
-  SURGERY      // Cirurgia
+  DEWORMING    
+  CONSULTATION
+  EXAM         
+  SURGERY      
   OTHER
 }
 
@@ -35,7 +34,7 @@ model User {
   name      String
   email     String   @unique
   password  String   
-  role      Role     @default(USER) // Por padrão, todo mundo é User
+  role      Role     @default(USER) 
 
   ownedPets   Pet[]  @relation("OwnerRelation") 
   tutoredPets Pet[]  @relation("TutorRelation") 
@@ -43,17 +42,17 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("users") // Boa prática: nomes de tabelas em minúsculo/plural no banco
+  @@map("users")
 }
 
 model Pet {
   id        Int       @id @default(autoincrement())
   name      String
-  species   Species   // Usa o Enum
-  breed     String?   // Raça (opcional, pois pode ser SRD)
-  birthDate DateTime? // Opcional (nem sempre sabem o dia exato)
-  weight    Float?    // Peso é útil para cálculo de remédios
-  pedigree  Boolean   @default(false) // Se tem pedigree ou não
+  species   Species 
+  breed     String?  
+  birthDate DateTime? 
+  weight    Float?    
+  pedigree  Boolean   @default(false) 
   healthRecords HealthRecord[]
   ownerId   Int
   owner     User      @relation("OwnerRelation", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -69,17 +68,16 @@ model Pet {
 model HealthRecord {
   id          Int        @id @default(autoincrement())
   
-  type        RecordType // VACCINE, CONSULTATION, etc.
-  title       String     // e.g., "Rabies Dose 1", "Dermatologist"
+  type        RecordType 
+  title       String     
   
-  date        DateTime   // When it happened
-  nextDueDate DateTime?  // When is the next one? (Crucial for reminders!)
+  date        DateTime   
+  nextDueDate DateTime?   
   
-  notes       String?    // e.g., "Doctor said to change diet"
-  doctor      String?    // e.g., "Dr. House"
-  clinic      String?    // e.g., "PetCare Center"
+  notes       String?    
+  doctor      String?    
+  clinic      String?    
 
-  // Relation to Pet
   petId       Int
   pet         Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
 

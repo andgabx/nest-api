@@ -1,50 +1,64 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { Prisma, Pet } from '@prisma/client';
+import { UpdatePetDto } from './dto/update-pet.dto';
+import { CreatePetDto } from './dto/create-pet.dto';
 
 @Injectable()
 export class PetsRepository {
   constructor(private readonly prisma: DatabaseService) {}
 
-  // Create a pet and link it to an Owner (User)
-  async create(data: Prisma.PetCreateInput): Promise<Pet> {
+  async create(ownerId: number, createPetDto: CreatePetDto): Promise<Pet> {
+    const { birthDate, ...rest } = createPetDto;
+
+    const data: Prisma.PetCreateInput = {
+      ...rest,
+      birthDate: birthDate ? new Date(birthDate) : undefined,
+
+      owner: {
+        connect: { id: ownerId },
+      },
+    };
+
     return this.prisma.pet.create({
       data,
       include: {
-        owner: true, // Optionally return the owner details
+        owner: { select: { id: true, name: true, email: true } },
       },
     });
   }
 
-  // Find all pets (with optional filtering logic if needed later)
   async findAll(): Promise<Pet[]> {
     return this.prisma.pet.findMany({
       include: {
-        owner: { select: { id: true, name: true, email: true } }, // Return basic owner info
+        owner: { select: { id: true, name: true, email: true } },
       },
     });
   }
 
-  // Find a specific pet by ID
   async findOne(id: number): Promise<Pet | null> {
     return this.prisma.pet.findUnique({
       where: { id },
       include: {
         owner: true,
-        tutors: true, // Include tutors to see who else takes care of this pet
+        tutors: true,
       },
     });
   }
 
-  // Update pet details
-  async update(id: number, data: Prisma.PetUpdateInput): Promise<Pet> {
+  async update(id: number, updatePetDto: UpdatePetDto): Promise<Pet> {
+    const data: Prisma.PetUpdateInput = {
+      ...updatePetDto,
+      birthDate: updatePetDto.birthDate
+        ? new Date(updatePetDto.birthDate)
+        : undefined,
+    };
     return this.prisma.pet.update({
       where: { id },
       data,
     });
   }
 
-  // Delete a pet
   async remove(id: number): Promise<Pet> {
     return this.prisma.pet.delete({
       where: { id },
@@ -56,11 +70,11 @@ export class PetsRepository {
       where: { id: petId },
       data: {
         tutors: {
-          connect: { id: tutorId }, // Connects the existing User to this Pet
+          connect: { id: tutorId },
         },
       },
       include: {
-        tutors: true, // Return the updated list of tutors
+        tutors: true,
       },
     });
   }
@@ -70,7 +84,7 @@ export class PetsRepository {
       where: { id: petId },
       data: {
         tutors: {
-          disconnect: { id: tutorId }, // Removes the link
+          disconnect: { id: tutorId },
         },
       },
     });

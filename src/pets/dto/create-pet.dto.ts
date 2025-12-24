@@ -12,7 +12,7 @@ import {
 
 export class CreatePetDto {
   @ApiProperty({
-    description: 'Nome do pet',
+    description: 'Name of the pet',
     example: 'Rex',
   })
   @IsString()
@@ -20,7 +20,7 @@ export class CreatePetDto {
   name: string;
 
   @ApiProperty({
-    description: 'Espécie do animal',
+    description: 'Species of the pet',
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     enum: Species,
     example: Species.DOG,
@@ -29,7 +29,7 @@ export class CreatePetDto {
   species: Species;
 
   @ApiProperty({
-    description: 'Raça do animal (opcional)',
+    description: 'Breed of the pet (optional)',
     example: 'Labrador',
     required: false,
   })
@@ -38,25 +38,21 @@ export class CreatePetDto {
   breed?: string;
 
   @ApiProperty({
-    description: 'Data de nascimento (ISO 8601)',
+    description: 'Birth date (ISO 8601)',
     example: '2020-05-15T00:00:00.000Z',
     required: false,
   })
-  @IsISO8601() // Valida se é uma string de data válida
+  @IsISO8601()
   @IsOptional()
-  birthDate?: string; // Recebemos como string do JSON, o Prisma converte se configurado ou convertemos no Service
+  birthDate?: string;
 
   @ApiProperty({
-    description: 'Peso atual em Kg',
+    description: 'Current weight in Kg',
     example: 12.5,
     required: false,
   })
   @IsNumber()
-  @Min(0) // Não existe peso negativo
+  @Min(0)
   @IsOptional()
   weight?: number;
-
-  // NOTA: Não colocamos 'ownerId' aqui.
-  // Boas práticas: O ownerId deve ser pego do token de autenticação (JWT) do usuário logado,
-  // e não confiado no corpo da requisição.
 }

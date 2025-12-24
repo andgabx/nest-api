@@ -6,19 +6,10 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PetsService {
-  // REMOVIDO: private readonly usersService: UsersService
   constructor(private readonly petsRepository: PetsRepository) {}
 
   async create(ownerId: number, createPetDto: CreatePetDto) {
-    const data: Prisma.PetCreateInput = {
-      ...createPetDto,
-      birthDate: createPetDto.birthDate ? new Date(createPetDto.birthDate) : undefined,
-      owner: {
-        connect: { id: ownerId },
-      },
-    };
-
-    return this.petsRepository.create(data);
+    return this.petsRepository.create(ownerId, createPetDto);
   }
 
   async findAll() {
@@ -36,17 +27,11 @@ export class PetsService {
   async update(id: number, updatePetDto: UpdatePetDto) {
     await this.findOne(id);
 
-    const data: Prisma.PetUpdateInput = {
-      ...updatePetDto,
-      birthDate: updatePetDto.birthDate ? new Date(updatePetDto.birthDate) : undefined,
-    };
-
-    return this.petsRepository.update(id, data);
+    return this.petsRepository.update(id, updatePetDto);
   }
 
   async remove(id: number) {
     await this.findOne(id);
     return this.petsRepository.remove(id);
   }
-
 }
