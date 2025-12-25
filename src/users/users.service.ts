@@ -59,6 +59,7 @@ export class UsersService {
     const user = await this.usersRepository.update(id, updateUserDto);
 
     const { password, ...result } = user;
+    
     return result;
   }
 

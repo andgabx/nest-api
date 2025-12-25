@@ -9,7 +9,7 @@ async function bootstrap() {
   // Validation Pipe global configuration
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Rmove properties that do not have any decorators
+      whitelist: true, // Remove properties that do not have any decorators
       forbidNonWhitelisted: true, // Throw an error if non-whitelisted properties are present
       transform: true, // Automatically transform payloads to DTO instances
     }),
@@ -17,7 +17,7 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('Nest Fundamentals')
+    .setTitle('Pets Management API - Nest Fundamentals')
     .setDescription('Nest.js Practice')
     .setVersion('1.0')
     .build();

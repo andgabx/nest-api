@@ -14,9 +14,10 @@ export class HealthService {
   ) {}
 
   async create(petId: number, createHealthRecordDto: CreateHealthRecordDto) {
+
     const pet = await this.petsService.findOne(petId);
     if (!pet) {
-      throw new NotFoundException(`Pet with ID ${petId} not found`);
+      throw new NotFoundException(`Pet with ID ${petId} not found to add health record`);
     }
 
     return this.healthRepository.create(petId, createHealthRecordDto);
@@ -24,14 +25,16 @@ export class HealthService {
 
   async findAllByPet(petId: number, type?: RecordType) {
     const pet = await this.petsService.findOne(petId);
+
     if (!pet) {
-      throw new NotFoundException(`Pet with ID ${petId} not found`);
+      throw new NotFoundException(`Pet with ID ${petId} not found to retrieve health records`);
     }
     return this.healthRepository.findAllByPet(petId, type);
   }
 
   async findOne(id: number) {
     const record = await this.healthRepository.findOne(id);
+
     if (!record) {
       throw new NotFoundException(`Health Record with ID ${id} not found`);
     }
@@ -39,13 +42,21 @@ export class HealthService {
   }
 
   async update(id: number, updateHealthRecordDto: UpdateHealthRecordDto) {
-    await this.findOne(id);
+    const record = await this.findOne(id);
+
+    if (!record) {
+      throw new NotFoundException(`Health Record with ID ${id} not found`);
+    }
 
     return this.healthRepository.update(id, updateHealthRecordDto);
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    const record = await this.findOne(id);
+    
+    if (!record) {
+      throw new NotFoundException(`Health Record with ID ${id} not found`);
+    }
     return this.healthRepository.remove(id);
   }
 }

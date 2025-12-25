@@ -34,6 +34,10 @@ export class CreateHealthRecordDto {
   @IsOptional()
   nextDueDate?: string;
 
+  @IsDateString()
+  @IsOptional()
+  birthDate?: string;
+
   @ApiProperty({ example: 'Dr. Silva', required: false })
   @IsString()
   @IsOptional()

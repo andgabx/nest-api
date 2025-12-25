@@ -11,6 +11,6 @@ import { HealthRepository } from './health/health.repository';
   imports: [DatabaseModule],
   controllers: [PetsController, HealthController],
   providers: [PetsService, PetsRepository, HealthService, HealthRepository],
-  exports: [PetsRepository],
+  exports: [PetsRepository, PetsService],
 })
 export class PetsModule {}
